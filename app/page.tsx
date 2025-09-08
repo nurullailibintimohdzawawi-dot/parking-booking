@@ -17,6 +17,7 @@ interface Booking {
   endTime: string;
   duration: number;
   totalPrice: number;
+  email: string;
 }
 
 export default function ParkingBooking() {
@@ -26,20 +27,21 @@ export default function ParkingBooking() {
   const [endTime, setEndTime] = useState('');
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [booking, setBooking] = useState<Booking | null>(null);
+  const [email, setEmail] = useState('');
 
   const parkingSlots: ParkingSlot[] = [
-    { id: 'A1', number: 1, isAvailable: true, price: 5 },
-    { id: 'A2', number: 2, isAvailable: false, price: 5 },
-    { id: 'A3', number: 3, isAvailable: true, price: 5 },
-    { id: 'A4', number: 4, isAvailable: true, price: 5 },
-    { id: 'B1', number: 5, isAvailable: true, price: 7 },
-    { id: 'B2', number: 6, isAvailable: false, price: 7 },
-    { id: 'B3', number: 7, isAvailable: true, price: 7 },
-    { id: 'B4', number: 8, isAvailable: true, price: 7 },
-    { id: 'C1', number: 9, isAvailable: true, price: 10 },
-    { id: 'C2', number: 10, isAvailable: true, price: 10 },
-    { id: 'C3', number: 11, isAvailable: false, price: 10 },
-    { id: 'C4', number: 12, isAvailable: true, price: 10 },
+    { id: 'A1', number: 1, isAvailable: true, price: 15 },
+    { id: 'A2', number: 2, isAvailable: false, price: 15 },
+    { id: 'A3', number: 3, isAvailable: true, price: 15 },
+    { id: 'A4', number: 4, isAvailable: true, price: 15 },
+    { id: 'B1', number: 5, isAvailable: true, price: 20 },
+    { id: 'B2', number: 6, isAvailable: false, price: 20 },
+    { id: 'B3', number: 7, isAvailable: true, price: 20 },
+    { id: 'B4', number: 8, isAvailable: true, price: 20 },
+    { id: 'C1', number: 9, isAvailable: true, price: 30 },
+    { id: 'C2', number: 10, isAvailable: true, price: 30 },
+    { id: 'C3', number: 11, isAvailable: false, price: 30 },
+    { id: 'C4', number: 12, isAvailable: true, price: 30 },
   ];
 
   const calculateDuration = (start: string, end: string): number => {
@@ -48,9 +50,19 @@ export default function ParkingBooking() {
     return (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60);
   };
 
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleBooking = () => {
-    if (!selectedSlot || !bookingDate || !startTime || !endTime) {
+    if (!selectedSlot || !bookingDate || !startTime || !endTime || !email) {
       alert('Please fill in all fields');
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      alert('Please enter a valid email address');
       return;
     }
 
@@ -70,7 +82,8 @@ export default function ParkingBooking() {
       startTime,
       endTime,
       duration,
-      totalPrice: duration * slot.price
+      totalPrice: duration * slot.price,
+      email
     };
 
     setBooking(newBooking);
@@ -78,12 +91,13 @@ export default function ParkingBooking() {
   };
 
   const confirmBooking = () => {
-    alert('Booking confirmed! You will receive a confirmation email shortly.');
+    alert(`Booking confirmed! A confirmation email has been sent to ${booking?.email}`);
     setShowConfirmation(false);
     setSelectedSlot(null);
     setBookingDate('');
     setStartTime('');
     setEndTime('');
+    setEmail('');
     setBooking(null);
   };
 
@@ -98,6 +112,10 @@ export default function ParkingBooking() {
               <div className="border-b pb-4">
                 <h2 className="text-xl font-semibold mb-4">Booking Details</h2>
                 <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-gray-600">Email:</p>
+                    <p className="font-semibold">{booking.email}</p>
+                  </div>
                   <div>
                     <p className="text-gray-600">Parking Slot:</p>
                     <p className="font-semibold">Slot #{booking.slotNumber}</p>
@@ -120,7 +138,7 @@ export default function ParkingBooking() {
               <div className="border-b pb-4">
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-semibold">Total Price:</span>
-                  <span className="text-2xl font-bold text-green-600">${booking.totalPrice}</span>
+                  <span className="text-2xl font-bold text-green-600">RM{booking.totalPrice}</span>
                 </div>
               </div>
             </div>
@@ -172,7 +190,7 @@ export default function ParkingBooking() {
                 >
                   <div className="text-center">
                     <div>#{slot.number}</div>
-                    <div className="text-xs">${slot.price}/hr</div>
+                    <div className="text-xs">RM{slot.price}/hr</div>
                     <div className="text-xs">
                       {slot.isAvailable ? 'Available' : 'Occupied'}
                     </div>
@@ -216,6 +234,19 @@ export default function ParkingBooking() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email Address:
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email address"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Booking Date:
                 </label>
                 <input
@@ -253,14 +284,14 @@ export default function ParkingBooking() {
                 </div>
               </div>
 
-              {selectedSlot && startTime && endTime && bookingDate && (
+              {selectedSlot && startTime && endTime && bookingDate && email && validateEmail(email) && (
                 <div className="bg-blue-50 p-4 rounded-lg">
                   <h3 className="font-semibold text-blue-900 mb-2">Booking Summary</h3>
                   <div className="text-sm text-blue-800 space-y-1">
                     <p>Duration: {calculateDuration(startTime, endTime)} hours</p>
-                    <p>Rate: ${parkingSlots.find(s => s.id === selectedSlot)?.price}/hour</p>
+                    <p>Rate: RM{parkingSlots.find(s => s.id === selectedSlot)?.price}/hour</p>
                     <p className="font-semibold">
-                      Total: ${(calculateDuration(startTime, endTime) * (parkingSlots.find(s => s.id === selectedSlot)?.price || 0)).toFixed(2)}
+                      Total: RM{(calculateDuration(startTime, endTime) * (parkingSlots.find(s => s.id === selectedSlot)?.price || 0)).toFixed(2)}
                     </p>
                   </div>
                 </div>
@@ -268,10 +299,10 @@ export default function ParkingBooking() {
 
               <button
                 onClick={handleBooking}
-                disabled={!selectedSlot || !bookingDate || !startTime || !endTime}
+                disabled={!selectedSlot || !bookingDate || !startTime || !endTime || !email || !validateEmail(email)}
                 className={`
                   w-full py-3 px-6 rounded-lg font-semibold transition-colors
-                  ${selectedSlot && bookingDate && startTime && endTime
+                  ${selectedSlot && bookingDate && startTime && endTime && email && validateEmail(email)
                     ? 'bg-blue-600 hover:bg-blue-700 text-white'
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }
